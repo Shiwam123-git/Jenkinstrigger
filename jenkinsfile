@@ -43,6 +43,24 @@ pipeline {
             }
         }
 
-        
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                kubectl apply -f kubernetes/deployment.yaml
+                kubectl apply -f kubernetes/service.yaml
+                kubectl rollout status deployment/nginx-deployment
+                kubectl get all
+                '''
+            }
+        }
     }
+
+        post {
+            success {
+                echo "✅ Image pushed and deployed: ${ECR_URI}/${ECR_REPO}:${IMAGE_TAG}"
+            }
+            cleanup {
+                sh "docker system prune -af"
+            }
+        }
 }
