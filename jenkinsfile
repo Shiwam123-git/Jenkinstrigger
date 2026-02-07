@@ -49,6 +49,8 @@ pipeline {
         success {
             echo "✅ Image pushed: ${ECR_URI}/${ECR_REPO}:${IMAGE_TAG}"
         }
-        
+        cleanup {
+            sh "docker system prune -af"
+        }
     }
 }
