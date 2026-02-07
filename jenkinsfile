@@ -42,6 +42,15 @@ pipeline {
                 """
             }
         }
+        stage('Configure Kubeconfig') {
+                 steps {
+                        sh '''
+                        # Update kubeconfig for Jenkins user
+                        aws eks --region us-east-1 update-kubeconfig --name <your-cluster-name>
+                        kubectl get nodes
+                        '''
+                    }
+}
 
         stage('Deploy to Kubernetes') {
             steps {
