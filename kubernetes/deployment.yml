@@ -1,0 +1,31 @@
+apiVersion : apps/v1
+kind : Deployment
+metadata :
+  name : nginx-deployment
+spec :
+  replicas : 2
+  selector :
+    matchLabels :
+      app : nginx
+  template :
+    metadata :
+      labels :
+        app : nginx 
+    spec :
+      containers :
+      - name : nginx
+        image : 577811233724.dkr.ecr.us-east-1.amazonaws.com/nginx
+        ports :
+        - containerPort : 80
+      livenessProbe :
+        httpGet :
+          path : /
+          port : 80
+        initialDelaySeconds : 30
+        periodSeconds : 10
+      redinessProbe :
+        httpGet :
+          path : /
+          port : 80
+        initialDelaySeconds : 30
+        periodSeconds : 10    
