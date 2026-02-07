@@ -10,7 +10,6 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout Code') {
             steps {
                 git branch: 'handson', url: 'https://github.com/Shiwam123-git/Jenkinstrigger.git'
@@ -26,14 +25,14 @@ pipeline {
         }
 
         stage('Login to ECR') {
-  steps {
-    sh '''
-      aws ecr get-login-password --region us-east-1 \
-      | docker login --username AWS --password-stdin \
-      ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com
-    '''
-  }
-}
+            steps {
+                sh '''
+                aws ecr get-login-password --region us-east-1 \
+                | docker login --username AWS --password-stdin \
+                ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com
+                '''
+            }
+        }
 
         stage('Tag & Push Image') {
             steps {
@@ -43,26 +42,25 @@ pipeline {
                 """
             }
         }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                kubectl apply -f kubernetes/deployment.yaml
+                kubectl apply -f kubernetes/service.yaml
+                kubectl rollout status deployment/nginx-deployment
+                kubectl get all
+                '''
+            }
+        }
     }
 
     post {
         success {
-            echo "✅ Image pushed: ${ECR_URI}/${ECR_REPO}:${IMAGE_TAG}"
+            echo "✅ Image pushed and deployed: ${ECR_URI}/${ECR_REPO}:${IMAGE_TAG}"
         }
         cleanup {
             sh "docker system prune -af"
-        }
-    }
-
-    stage('Deploy to Kubernetes') {
-        steps {
-            sh """
-             
-              kubectl apply -f kubernetes/deployment.yaml
-              kubectl apply -f kubernetes/service.yaml
-              kubectl rollout status deployment/nginx-deployment
-             
-            """
         }
     }
 }
