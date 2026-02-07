@@ -1,0 +1,56 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_REGION = "us-east-1"
+        AWS_ACCOUNT_ID = "577811233724"
+        ECR_REPO = "nginx"
+        IMAGE_TAG = "${BUILD_NUMBER}"
+        ECR_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+    }
+
+    stages {
+
+        stage('Checkout Code') {
+            steps {
+                git branch: 'handson', url: 'https://github.com/Shiwam123-git/Jenkinstrigger.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh """
+                docker build -t ${ECR_REPO}:${IMAGE_TAG} .
+                """
+            }
+        }
+
+        stage('Login to ECR') {
+  steps {
+    sh '''
+      aws ecr get-login-password --region us-east-1 \
+      | docker login --username AWS --password-stdin \
+      ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com
+    '''
+  }
+}
+
+        stage('Tag & Push Image') {
+            steps {
+                sh """
+                docker tag ${ECR_REPO}:${IMAGE_TAG} ${ECR_URI}/${ECR_REPO}:${IMAGE_TAG}
+                docker push ${ECR_URI}/${ECR_REPO}:${IMAGE_TAG}
+                """
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Image pushed: ${ECR_URI}/${ECR_REPO}:${IMAGE_TAG}"
+        }
+        cleanup {
+            sh "docker system prune -af"
+        }
+    }
+}
