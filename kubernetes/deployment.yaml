@@ -30,7 +30,4 @@ spec :
         initialDelaySeconds : 30
         periodSeconds : 10    
 
-      volumes : 
-      - name : nginx-pvc
-        persistentVolumeClaim :
-          claimName : nginx-pvc  
+       
