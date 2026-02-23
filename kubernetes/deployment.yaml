@@ -17,6 +17,10 @@ spec :
         image : 577811233724.dkr.ecr.us-east-1.amazonaws.com/nginx
         ports :
         - containerPort : 80
+        volumeMounts :
+        - name : nginx-pvc
+          mountPath : /usr/share/nginx/html  
+
       livenessProbe :
         httpGet :
           path : /
@@ -29,3 +33,8 @@ spec :
           port : 80
         initialDelaySeconds : 30
         periodSeconds : 10    
+
+      volumes : 
+      - name : nginx-pvc
+        persistentVolumeClaim :
+          claimName : nginx-pvc  
