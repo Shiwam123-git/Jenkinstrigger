@@ -55,6 +55,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh '''
+                kubectl apply --validate=false -f kubernetes/pvc.yaml
                 kubectl apply --validate=false -f kubernetes/deployment.yaml
                 kubectl apply --validate=false -f kubernetes/service.yaml
                 kubectl rollout status deployment/nginx-deployment
